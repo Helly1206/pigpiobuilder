@@ -1,0 +1,10 @@
+#!/bin/bash
+
+NAME="pigpio_builder"
+OPTDIR="/opt"
+OPTLOC="$OPTDIR/$NAME"
+BINNAME="/usr/bin/update_pigpio"
+
+ln -s "$OPTLOC/$NAME.py" $BINNAME
+
+exit 0

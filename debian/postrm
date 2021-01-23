@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "Removing this package doesn't remove pigpio, you need to do that yourself"
+
+BINNAME="/usr/bin/update_pigpio"
+
+[ -L $BINNAME ] && unlink $BINNAME
+
+exit 0

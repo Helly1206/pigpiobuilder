@@ -1,0 +1,5 @@
+// This file runs the installer and builder for pigpio
+// When a new version is available this will be build and installed
+
+APT::Update::Post-Invoke-Success {"/opt/pigpio_builder/pigpio_builder.py update";};
+
