@@ -1,3 +1,10 @@
+pigpiobuilder (0.81) stable; urgency=low
+
+  * Added gcc, make dependencies
+  * Fixed link to executable
+
+ -- Helly1206 <hellyrulez@hotmail.com>  Sat, 29 Oct 2022 15:11:48 +0100
+
 pigpiobuilder (0.80) stable; urgency=low
 
   * Initial pigpio_builder release

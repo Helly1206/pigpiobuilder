@@ -8,7 +8,9 @@ XB-Plugin-Section: sharing
 
 Package: pigpiobuilder
 Architecture: all
-Depends: python3,
+Depends: gcc,
+         make,
+         python3,
          python3-setuptools,
          ${misc:Depends}
 Description: pigpio_builder (Automatic downloading and builing the latest version of pigpio with apt upgrade)

@@ -31,6 +31,8 @@ FOLDER_PRE      = "pigpio-"
 BUILD_LOC       = "/var/pigpio_build/"
 VERSIONFILE_INS = "/opt/pigpio_builder/pigpio_version"
 VERSIONFILE_CUR = "/opt/pigpio_builder/pigpio_current"
+PIGPIOD_LOC     = "/usr/local/bin/pigpiod"
+PIGPIOD_ALT_LOC = "/usr/bin/pigpiod"
 SERVICE_LOC     = "/etc/systemd/system/"
 SERVICE_FILE    = "pigpiod.service"
 SERVICE_SRC     = "/util/"
@@ -46,7 +48,7 @@ def process_current_version(update):
         if version == 0:
             version = obtain_current_version()
             set_current_version(version)
-            
+
     return version
 
 def obtain_current_version():
@@ -78,7 +80,7 @@ def get_current_version():
 def set_current_version(version):
     with open(VERSIONFILE_CUR, 'w') as verfile:
         verfile.write(str(version))
-    
+
     return version
 
 def get_installed_version():
@@ -93,63 +95,76 @@ def get_installed_version():
 def set_installed_version(version):
     with open(VERSIONFILE_INS, 'w') as verfile:
         verfile.write(str(version))
-    
+
     return version
 
 def download_build(version):
     filename = GITHUB_PRE + str(version) + GITHUB_EXT
     url = GITHUB_ARCHIVE + filename
     fileloc = BUILD_LOC + filename
-    
+
     if not os.path.isdir(BUILD_LOC):
         os.mkdir(BUILD_LOC)
-    
+
     r = requests.get(url, allow_redirects=True)
     open(fileloc, 'wb').write(r.content)
-    
+
     with ZipFile(fileloc, 'r') as zipObj:
         # Extract all the contents of zip file in different directory
-        zipObj.extractall(BUILD_LOC)  
-        
+        zipObj.extractall(BUILD_LOC)
+
 def build(version):
     folder = BUILD_LOC + FOLDER_PRE + str(version)
-    
+
     out = subprocess.run(["make"], stderr=sys.stderr, stdout=sys.stdout, cwd = folder)
-    
+
     if out.returncode != 0:
         print("Error building pigpio, not installing")
         return
-    
+
     out = subprocess.run(["make","install"], stderr=sys.stderr, stdout=sys.stdout, cwd = folder)
-    
+
     if out.returncode != 0:
         print("Error installing pigpio, pigpio not installed")
-    
+
     return
-    
+
 def cleanup():
     rmtree(BUILD_LOC)
-    
+
     return
-   
+
+def update_pigpiodloc():
+    existLoc    = os.path.exists(PIGPIOD_LOC)
+    existAltLoc = os.path.exists(PIGPIOD_ALT_LOC)
+    if existLoc and existAltLoc:
+        pass
+    elif existLoc:
+        os.symlink(existLoc, existAltLoc)
+    elif existAltLoc:
+        os.symlink(existAltLoc, existLoc)
+    else:
+        print("Error pigpiod executable doesn't exist")
+    return
+
 def start_service(version):
     src_folder = BUILD_LOC + FOLDER_PRE + str(version) + SERVICE_SRC + SERVICE_FILE
     dst_folder = SERVICE_LOC + SERVICE_FILE
-    
+
     copyfile(src_folder, dst_folder)
-    
+
     out = subprocess.run(["systemctl","enable", SERVICE_FILE], stderr=sys.stderr, stdout=sys.stdout)
-    
+
     if out.returncode != 0:
         print("Error enabling pigpio service")
-    
+
     out = subprocess.run(["systemctl","start", SERVICE_FILE], stderr=sys.stderr, stdout=sys.stdout)
-    
+
     if out.returncode != 0:
         print("Error starting pigpio service")
-        
+
     return
-    
+
 #########################################################
 
 ######################### MAIN ##########################
@@ -157,7 +172,7 @@ if __name__ == "__main__":
     if os.getuid() != 0:
         print("This program needs to be run as super user")
         print("try: sudo update_pigpio")
-        exit(2) 
+        exit(2)
 
     version = 0
     installed_version = get_installed_version()
@@ -199,6 +214,6 @@ if __name__ == "__main__":
     download_build(version)
     build(version)
     set_installed_version(version)
+    update_pigpiodloc()
     start_service(version)
     cleanup()
-    

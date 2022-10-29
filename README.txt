@@ -1,4 +1,4 @@
-pigpio_builder v0.80
+pigpio_builder v0.81
 
 pigpio_builder -- Automatic downloading and builing the latest version of pigpio with apt upgrade
 ============== == ========= =========== === ======= === ====== ======= == ====== ==== === =======
